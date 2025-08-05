@@ -2,4 +2,12 @@
 --  I promise not to create any merge conflicts in this directory :)
 --
 -- See the kickstart.nvim README for more information
-return {}
+return {
+  { -- Easy commenting plugin
+    'numToStr/Comment.nvim',
+    event = 'VeryLazy',
+    opts = {
+      -- Basic configuration, automatically detects comment strings for different file types
+    },
+  },
+}
