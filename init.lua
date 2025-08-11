@@ -248,6 +248,40 @@ require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
 
+  {
+    'github/copilot.vim',
+    config = function()
+      vim.g.copilot_no_tab_map = true
+      
+      -- Disable automatic suggestions  
+      vim.api.nvim_create_autocmd('VimEnter', {
+        callback = function()
+          vim.cmd('Copilot disable')
+        end,
+      })
+      
+      -- Option+Tab shows suggestions
+      vim.keymap.set('i', '<M-Tab>', function()
+        vim.cmd('Copilot enable')
+        vim.fn['copilot#Suggest']()
+        return ''
+      end, { expr = true })
+      
+      -- Option+Enter accepts suggestions
+      vim.keymap.set('i', '<M-CR>', function()
+        return vim.fn['copilot#Accept']("\\<CR>")
+      end, { expr = true, replace_keycodes = false })
+      
+      -- Hide suggestions on any normal key press
+      vim.api.nvim_create_autocmd('InsertCharPre', {
+        callback = function()
+          vim.fn['copilot#Dismiss']()
+          vim.cmd('Copilot disable')
+        end,
+      })
+    end,
+  },
+
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
@@ -414,7 +448,7 @@ require('lazy').setup({
         pickers = {
           find_files = {
             hidden = true,
-            file_ignore_patterns = { "%.git/" },
+            file_ignore_patterns = { '%.git/' },
           },
         },
         extensions = {
@@ -1033,6 +1067,12 @@ vim.api.nvim_create_autocmd('VimEnter', {
   desc = 'Load custom macOS theme',
   callback = function()
     vim.cmd.colorscheme 'macostheme'
+    
+    -- Mute Copilot suggestion colors
+    vim.api.nvim_set_hl(0, 'CopilotSuggestion', { fg = '#5a5a5a', italic = true })
+    
+    -- Add subtle indicator highlight for statusline
+    vim.api.nvim_set_hl(0, 'CopilotIndicator', { fg = '#808080', bg = 'NONE' })
   end,
 })
 
