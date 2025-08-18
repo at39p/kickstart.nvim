@@ -436,6 +436,22 @@ require('lazy').setup({
 
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
+      
+      -- Function to read .telescope file for project-specific ignores
+      local function get_telescope_ignores()
+        local ignore_patterns = { '%.git/' }
+        local telescope_file = vim.fn.getcwd() .. '/.telescope'
+        if vim.fn.filereadable(telescope_file) == 1 then
+          for line in io.lines(telescope_file) do
+            line = line:gsub("^%s*(.-)%s*$", "%1") -- trim whitespace
+            if line ~= "" and not line:match("^#") then
+              table.insert(ignore_patterns, line)
+            end
+          end
+        end
+        return ignore_patterns
+      end
+
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
@@ -448,7 +464,10 @@ require('lazy').setup({
         pickers = {
           find_files = {
             hidden = true,
-            file_ignore_patterns = { '%.git/' },
+            file_ignore_patterns = get_telescope_ignores(),
+          },
+          live_grep = {
+            file_ignore_patterns = get_telescope_ignores(),
           },
         },
         extensions = {
