@@ -102,7 +102,7 @@ vim.g.have_nerd_font = false
 vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
@@ -218,6 +218,19 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- Set Go-specific indentation
+vim.api.nvim_create_autocmd('FileType', {
+  desc = 'Set Go indentation to 4 spaces',
+  pattern = 'go',
+  group = vim.api.nvim_create_augroup('go-indent', { clear = true }),
+  callback = function()
+    vim.opt_local.expandtab = true
+    vim.opt_local.tabstop = 4
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.softtabstop = 4
+  end,
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -253,31 +266,31 @@ require('lazy').setup({
     'github/copilot.vim',
     config = function()
       vim.g.copilot_no_tab_map = true
-      
-      -- Disable automatic suggestions  
+
+      -- Disable automatic suggestions
       vim.api.nvim_create_autocmd('VimEnter', {
         callback = function()
-          vim.cmd('Copilot disable')
+          vim.cmd 'Copilot disable'
         end,
       })
-      
+
       -- Option+Tab shows suggestions
       vim.keymap.set('i', '<M-Tab>', function()
-        vim.cmd('Copilot enable')
+        vim.cmd 'Copilot enable'
         vim.fn['copilot#Suggest']()
         return ''
       end, { expr = true })
-      
+
       -- Option+Enter accepts suggestions
       vim.keymap.set('i', '<M-CR>', function()
-        return vim.fn['copilot#Accept']("\\<CR>")
+        return vim.fn['copilot#Accept'] '\\<CR>'
       end, { expr = true, replace_keycodes = false })
-      
+
       -- Hide suggestions on any normal key press
       vim.api.nvim_create_autocmd('InsertCharPre', {
         callback = function()
           vim.fn['copilot#Dismiss']()
-          vim.cmd('Copilot disable')
+          vim.cmd 'Copilot disable'
         end,
       })
     end,
@@ -437,15 +450,15 @@ require('lazy').setup({
 
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
-      
+
       -- Function to read .telescope file for project-specific ignores
       local function get_telescope_ignores()
         local ignore_patterns = { '%.git/' }
         local telescope_file = vim.fn.getcwd() .. '/.telescope'
         if vim.fn.filereadable(telescope_file) == 1 then
           for line in io.lines(telescope_file) do
-            line = line:gsub("^%s*(.-)%s*$", "%1") -- trim whitespace
-            if line ~= "" and not line:match("^#") then
+            line = line:gsub('^%s*(.-)%s*$', '%1') -- trim whitespace
+            if line ~= '' and not line:match '^#' then
               table.insert(ignore_patterns, line)
             end
           end
@@ -806,6 +819,7 @@ require('lazy').setup({
         ensure_installed = {
           'gopls',
           'zls',
+          'marksman',
         }, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
         automatic_installation = false,
         handlers = {
@@ -1087,10 +1101,10 @@ vim.api.nvim_create_autocmd('VimEnter', {
   desc = 'Load custom macOS theme',
   callback = function()
     vim.cmd.colorscheme 'macostheme'
-    
+
     -- Mute Copilot suggestion colors
     vim.api.nvim_set_hl(0, 'CopilotSuggestion', { fg = '#5a5a5a', italic = true })
-    
+
     -- Add subtle indicator highlight for statusline
     vim.api.nvim_set_hl(0, 'CopilotIndicator', { fg = '#808080', bg = 'NONE' })
   end,
