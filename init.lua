@@ -976,10 +976,11 @@ require('lazy').setup({
     },
   },
 
-  -- Keep tokyonight as fallback only
+  -- Tokyo Night colorscheme
   {
     'folke/tokyonight.nvim',
-    lazy = true, -- Don't load automatically
+    lazy = false, -- Load immediately since we're using it
+    priority = 1000, -- Load before other plugins
   },
 
   -- Highlight todo, notes, etc in comments
@@ -1098,15 +1099,20 @@ require('lazy').setup({
 
 -- Load custom colorscheme after Neovim has fully started
 vim.api.nvim_create_autocmd('VimEnter', {
-  desc = 'Load custom macOS theme',
+  desc = 'Load tokyonight-day theme and open telescope',
   callback = function()
-    vim.cmd.colorscheme 'macostheme'
+    vim.cmd.colorscheme 'tokyonight-day'
 
     -- Mute Copilot suggestion colors
     vim.api.nvim_set_hl(0, 'CopilotSuggestion', { fg = '#5a5a5a', italic = true })
 
     -- Add subtle indicator highlight for statusline
     vim.api.nvim_set_hl(0, 'CopilotIndicator', { fg = '#808080', bg = 'NONE' })
+
+    -- Open telescope find_files on startup
+    vim.defer_fn(function()
+      require('telescope.builtin').find_files()
+    end, 100)
   end,
 })
 
