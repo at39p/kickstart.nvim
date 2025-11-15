@@ -912,7 +912,15 @@ require('lazy').setup({
           --   end,
           -- },
         },
-        opts = {},
+        config = function()
+          local ls = require 'luasnip'
+          ls.setup {
+            -- Automatically delete snippet when cursor leaves the region
+            region_check_events = 'CursorMoved,CursorMovedI',
+            -- Delete snippet when cursor leaves snippet region
+            delete_check_events = 'TextChanged,InsertLeave',
+          }
+        end,
       },
       'folke/lazydev.nvim',
     },
